@@ -18,11 +18,11 @@ export default function PageAbout() {
         ))}
         <div className="skills-section">
           {about.skillGroups.map((group) => (
-            <div key={group.label}>
-              <h4>{group.label}</h4>
+            <div key={group.title}>
+              <h4>{group.title}</h4>
               <div className="skills-list">
-                {group.items.map((item) => (
-                  <span key={item} className="skill-item">{item}</span>
+                {group.tags.map((tag) => (
+                  <span key={tag} className="skill-item">{tag}</span>
                 ))}
               </div>
             </div>

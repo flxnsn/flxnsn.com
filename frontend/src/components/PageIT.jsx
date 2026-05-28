@@ -19,7 +19,7 @@ export default function PageIT() {
                   <span key={tag} className="tech-tag">{tag}</span>
                 ))}
               </div>
-              {project.body.map((paragraph, i) => (
+              {project.desc.map((paragraph, i) => (
                 <p key={i} style={i > 0 ? { marginTop: '.5rem' } : undefined}>{paragraph}</p>
               ))}
             </div>
