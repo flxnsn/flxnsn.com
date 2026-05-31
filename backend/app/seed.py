@@ -5,7 +5,7 @@ Called on every startup: wipes all tables and reloads the original data
 that was previously hard-coded in the JS frontend.
 """
 from sqlalchemy.orm import Session
-import models
+from app import models
 
 # example data
 

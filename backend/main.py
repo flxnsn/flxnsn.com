@@ -4,8 +4,12 @@ from app.config import FRONTEND_ORIGIN
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import Base, engine, get_db
-import app.models, app.schemas, app.seed
+from app.database import Base, engine, get_db
+#from app.models import DesignProject, DesignTag, DesignImage, ITProject, ITTag, ITDesc, Photo
+#from app.schemas import DesignTagSchema, DesignImageSchema, DesignProject, ITTagSchema, ITDescSchema, ITImageSchema, ITProject, Photo
+#from app.seed import DESIGN_PROJECTS, IT_PROJECTS, PHOTOS
+# import app.models, app.schemas, app.seed
+from app import models, schemas, seed
 
 app = FastAPI(title="Portfolio API")
 
