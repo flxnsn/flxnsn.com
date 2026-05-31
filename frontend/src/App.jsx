@@ -9,8 +9,9 @@ import PageDesign    from './components/PageDesign';
 import PagePhoto     from './components/PagePhoto';
 import PageAbout     from './components/PageAbout';
 import PageImpressum from './components/PageImpressum';
+import Admin         from './components/Admin';
 
-const PAGES = ['home', 'it', 'design', 'photo', 'about', 'impressum'];
+const PAGES = ['home', 'it', 'design', 'photo', 'about', 'impressum', 'admin'];
 
 const PAGE_COMPONENTS = {
   home:      PageHome,
@@ -19,6 +20,7 @@ const PAGE_COMPONENTS = {
   photo:     PagePhoto,
   about:     PageAbout,
   impressum: PageImpressum,
+  admin:     Admin,
 };
 
 export default function App() {
@@ -35,13 +37,14 @@ export default function App() {
     }, 0);
   }
 
-  // Global Escape → close contact modal
+  // Global Escape → close contact popup
   useEffect(() => {
-    function onKey(e) {
-      if (e.key === 'Escape' && contactOpen) setContactOpen(false);
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+  function onKey(e) {
+    if (e.key === 'Escape' && contactOpen) setContactOpen(false);
+    if (e.altKey && e.key === 'a') navigate('admin'); // Alt+A
+  }
+  window.addEventListener('keydown', onKey);
+  return () => window.removeEventListener('keydown', onKey);
   }, [contactOpen]);
 
   return (
