@@ -1,4 +1,6 @@
-import { itProjects } from '../data/content';
+// import { itProjects } from '../data/content'; // old, static data
+import { loadAllData } from '../data/api.js';
+const { designProjects, itProjects, photos } = await loadAllData();
 
 export default function PageIT() {
   return (

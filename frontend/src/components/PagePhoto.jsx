@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { photos } from '../data/content';
 import Lightbox from './Lightbox';
+// import { photos } from '../data/content'; // old, static data
+import { loadAllData } from '../data/api.js';
+const { designProjects, itProjects, photos } = await loadAllData();
 
 export default function PagePhoto() {
   const [lightboxIdx, setLightboxIdx] = useState(null);

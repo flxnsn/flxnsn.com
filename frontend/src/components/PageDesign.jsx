@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { designProjects } from '../data/content';
+// import { designProjects } from '../data/content'; // old, static data
+import { loadAllData } from '../data/api.js';
+const { designProjects, itProjects, photos } = await loadAllData();
+
 
 function layoutClass(images) {
   const n = images.length;
