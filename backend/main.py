@@ -15,7 +15,7 @@ from app import models, schemas, seed
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-reset_db = True
+reset_db = False
 
 app = FastAPI(title="Portfolio API")
 
