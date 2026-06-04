@@ -15,6 +15,7 @@ from app import models, schemas, seed
 
 UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
+reset_db = True
 
 app = FastAPI(title="Portfolio API")
 
@@ -28,14 +29,16 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-    db = next(get_db())
-    try:
-        seed.clear_and_seed(db)
-    finally:
-        db.close()
+    if reset_db:
+        db = next(get_db())
+        try:
+            seed.clear_and_seed(db)
+        finally:
+            db.close()
 
 
 # image upload for later or never idk
