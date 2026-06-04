@@ -12,7 +12,10 @@
  *   const photos         = await getPhotos();
  */
 
-const BASE_URL = 'http://localhost:8000';
+//const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://flxnsn-com.onrender.com';
+
+
 
 // util
 

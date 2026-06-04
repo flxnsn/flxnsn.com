@@ -4,9 +4,9 @@ export const siteConfig = {
   brand: 'flxnsn',
   name: 'Felix Nissen',
   subtitle: 'Developer & Media Designer',
-  contactEmail: 'hello@johndoe.dev',
-  github: 'https://github.com',
-  linkedin: 'https://linkedin.com',
+  contactEmail: 'flxnsn@web.de',
+  github: 'https://github.com/flxnsn/',
+  linkedin: 'https://www.linkedin.com/in/flxnsn/',
   copyright: '© 2026 Felix Nissen',
 };
 
