@@ -17,7 +17,7 @@
  *   POST            /api.php?r=seed-reset
  */
 
-// ── Config ────────────────────────────────────────────────────────────────────
+// config
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'USER402238_porto');
@@ -28,7 +28,7 @@ define('UPLOAD_DIR', __DIR__ . '/uploads/');
 define('UPLOAD_URL', '/uploads/');
 define('ALLOWED_EXT', ['jpg','jpeg','png','gif','webp','avif']);
 
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
+// bootstrap
 
 header('Content-Type: application/json');
 
@@ -39,7 +39,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
-// ── DB connect (mysqli) ───────────────────────────────────────────────────────
+// connection
 
 $db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if ($db->connect_error) {
@@ -49,7 +49,7 @@ $db->set_charset('utf8mb4');
 
 create_tables($db);
 
-// ── Router ────────────────────────────────────────────────────────────────────
+// router
 
 $route  = isset($_GET['r'])  ? $_GET['r']  : '';
 $id     = isset($_GET['id']) ? $_GET['id'] : null;
@@ -65,7 +65,7 @@ else if ($route === 'seed')         handle_seed($db, false);
 else if ($route === 'seed-reset')   handle_seed($db, true);
 else                                respond(404, ['detail' => 'Not found']);
 
-// ── Schema ────────────────────────────────────────────────────────────────────
+// schemes
 
 function create_tables($db) {
     $tables = [
@@ -115,7 +115,7 @@ function create_tables($db) {
     }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// utils
 
 function respond($code, $data) {
     http_response_code($code);
@@ -159,7 +159,7 @@ function db_run($db, $sql, $types, $params) {
     return $ok;
 }
 
-// ── Design ────────────────────────────────────────────────────────────────────
+// design
 
 function fetch_design($db, $id) {
     $proj = db_fetch_one($db, "SELECT * FROM design_projects WHERE id = ?", 's', [$id]);
@@ -215,7 +215,7 @@ function handle_design($db, $method, $id, $body) {
     respond(405, ['detail' => 'Method not allowed']);
 }
 
-// ── IT ────────────────────────────────────────────────────────────────────────
+// IT
 
 function fetch_it($db, $id) {
     $proj = db_fetch_one($db, "SELECT * FROM it_projects WHERE id = ?", 's', [$id]);
@@ -273,7 +273,7 @@ function handle_it($db, $method, $id, $body) {
     respond(405, ['detail' => 'Method not allowed']);
 }
 
-// ── Photos ────────────────────────────────────────────────────────────────────
+// photos
 
 function handle_photos($db, $method, $id, $body) {
     if ($method === 'GET' && !$id) {
@@ -305,7 +305,7 @@ function handle_photos($db, $method, $id, $body) {
     respond(405, ['detail' => 'Method not allowed']);
 }
 
-// ── File upload ───────────────────────────────────────────────────────────────
+// file upload
 
 function handle_upload() {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond(405, ['detail' => 'Method not allowed']);
@@ -326,7 +326,7 @@ function handle_upload() {
     respond(200, ['url' => UPLOAD_URL . $filename]);
 }
 
-// ── Seed ──────────────────────────────────────────────────────────────────────
+// seeding
 
 function handle_seed($db, $reset) {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') respond(405, ['detail' => 'Method not allowed']);
