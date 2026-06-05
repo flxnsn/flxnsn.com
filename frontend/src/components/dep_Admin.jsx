@@ -10,9 +10,22 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { adminApi as api } from "../data/api.js";
 
-const API = "/api.php";
+const API = "http://localhost:8000";
+
+// utils
+
+const api = {
+  get:    (path)         => fetch(`${API}${path}`).then(r => r.json()),
+  post:   (path, body)   => fetch(`${API}${path}`, { method:"POST",   headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) }).then(r => r.json()),
+  put:    (path, body)   => fetch(`${API}${path}`, { method:"PUT",    headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) }).then(r => r.json()),
+  delete: (path)         => fetch(`${API}${path}`, { method:"DELETE" }),
+  upload: (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return fetch(`${API}/upload-image`, { method:"POST", body: fd }).then(r => r.json());
+  },
+};
 
 // super safe password location
 
@@ -112,7 +125,7 @@ function ImageField({ url, onChange, label = "Image" }) {
     setUploading(true);
     try {
       const data = await api.upload(file);
-      onChange(data.url.startsWith("http") ? data.url : `${window.location.origin}${data.url}`);
+      onChange(`${API}${data.url}`);
     } finally {
       setUploading(false);
     }
@@ -212,7 +225,7 @@ function DesignModal({ item, onSave, onClose }) {
     setSaving(true);
     try {
       const payload = { title: form.title, desc: form.desc, tags: form.tags, images: form.images };
-      const result = item ? await api.put("design", item.id, payload) : await api.post("design", payload);
+      const result = item ? await api.put(`/design/${item.id}`, payload) : await api.post("/design", payload);
       onSave(result);
     } finally { setSaving(false); }
   }
@@ -268,7 +281,7 @@ function ITModal({ item, onSave, onClose }) {
     setSaving(true);
     try {
       const payload = { title:form.title, tags:form.tags, desc:form.desc.filter(Boolean), image_src:form.image_src||null, image_alt:form.image_alt||null };
-      const result = item ? await api.put("it", item.id, payload) : await api.post("it", payload);
+      const result = item ? await api.put(`/it/${item.id}`, payload) : await api.post("/it", payload);
       onSave(result);
     } finally { setSaving(false); }
   }
@@ -316,7 +329,7 @@ function PhotoModal({ item, onSave, onClose }) {
   async function save() {
     setSaving(true);
     try {
-      const result = item ? await api.put("photos", item.id, form) : await api.post("photos", form);
+      const result = item ? await api.put(`/photos/${item.id}`, form) : await api.post("/photos", form);
       onSave(result);
     } finally { setSaving(false); }
   }
@@ -354,7 +367,7 @@ function DesignPanel({ toast }) {
   const [editing, setEditing] = useState(null); // null = closed, "new" or item obj
   const [deleting, setDeleting] = useState(null);
 
-  useEffect(() => { api.get("design").then(setItems); }, []);
+  useEffect(() => { api.get("/design").then(setItems); }, []);
 
   function handleSave(result) {
     setItems(prev => prev.find(x => x.id === result.id) ? prev.map(x => x.id===result.id ? result : x) : [...prev, result]);
@@ -362,7 +375,7 @@ function DesignPanel({ toast }) {
     toast("Saved.");
   }
   async function handleDelete(item) {
-    await api.delete("design", item.id);
+    await api.delete(`/design/${item.id}`);
     setItems(prev => prev.filter(x => x.id !== item.id));
     setDeleting(null);
     toast("Deleted.");
@@ -397,7 +410,7 @@ function ITPanel({ toast }) {
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
 
-  useEffect(() => { api.get("it").then(setItems); }, []);
+  useEffect(() => { api.get("/it").then(setItems); }, []);
 
   function handleSave(result) {
     setItems(prev => prev.find(x => x.id === result.id) ? prev.map(x => x.id===result.id ? result : x) : [...prev, result]);
@@ -405,7 +418,7 @@ function ITPanel({ toast }) {
     toast("Saved.");
   }
   async function handleDelete(item) {
-    await api.delete("it", item.id);
+    await api.delete(`/it/${item.id}`);
     setItems(prev => prev.filter(x => x.id !== item.id));
     setDeleting(null);
     toast("Deleted.");
@@ -439,7 +452,7 @@ function PhotoPanel({ toast }) {
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
 
-  useEffect(() => { api.get("photos").then(setItems); }, []);
+  useEffect(() => { api.get("/photos").then(setItems); }, []);
 
   function handleSave(result) {
     setItems(prev => prev.find(x => x.id === result.id) ? prev.map(x => x.id===result.id ? result : x) : [...prev, result]);
@@ -447,7 +460,7 @@ function PhotoPanel({ toast }) {
     toast("Saved.");
   }
   async function handleDelete(item) {
-    await api.delete("photos", item.id);
+    await api.delete(`/photos/${item.id}`);
     setItems(prev => prev.filter(x => x.id !== item.id));
     setDeleting(null);
     toast("Deleted.");
@@ -472,67 +485,6 @@ function PhotoPanel({ toast }) {
 
       {editing && <PhotoModal item={editing==="new"?null:editing} onSave={handleSave} onClose={() => setEditing(null)} />}
       {deleting && <ConfirmModal title={deleting.title} onConfirm={() => handleDelete(deleting)} onCancel={() => setDeleting(null)} />}
-    </>
-  );
-}
-
-// database panel
-
-function DatabasePanel({ toast }) {
-  const [confirming, setConfirming] = useState(null); // "seed" | "reset" | null
-  const [busy, setBusy] = useState(false);
-
-  async function execute(action) {
-    setBusy(true);
-    setConfirming(null);
-    try {
-      const res = await (action === "reset" ? api.seedReset() : api.seed());
-      toast(res.detail ?? "Done.");
-    } catch {
-      toast("Error — check console.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <>
-      <p style={{ ...css.muted, marginBottom:"2rem" }}>
-        Use these actions to populate the database with default seed data.
-        <br />
-        <strong style={{ color:"var(--accent)" }}>Reset</strong> will wipe all existing data before reseeding.
-      </p>
-
-      <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap" }}>
-        <button style={css.btnAdd} disabled={busy} onClick={() => setConfirming("seed")}>
-          Seed default data
-        </button>
-        <button style={{ ...css.btnDel, padding:".5rem 1.4rem", marginTop:".75rem" }} disabled={busy} onClick={() => setConfirming("reset")}>
-          ⚠ Wipe &amp; reseed
-        </button>
-      </div>
-
-      {confirming && (
-        <div style={css.overlay} onClick={() => setConfirming(null)}>
-          <div style={{ ...css.modal, maxWidth:420 }} onClick={e => e.stopPropagation()}>
-            <p style={{ ...css.modalTitle, fontSize:"1.2rem", marginBottom:".75rem" }}>
-              {confirming === "reset" ? "Wipe all data and reseed?" : "Seed default data?"}
-            </p>
-            <p style={css.muted}>
-              {confirming === "reset"
-                ? "This will permanently delete all existing entries and replace them with the default seed data. This cannot be undone."
-                : "This will add the default seed entries to the database (existing entries are kept)."}
-            </p>
-            <div style={css.modalFooter}>
-              <button style={css.btnSecondary} onClick={() => setConfirming(null)}>Cancel</button>
-              <button style={{ ...css.btnPrimary, background: confirming === "reset" ? "var(--accent)" : undefined }}
-                onClick={() => execute(confirming)}>
-                {confirming === "reset" ? "Yes, wipe & reseed" : "Yes, seed"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -573,7 +525,7 @@ function PasswordGate({ onUnlock }) {
 
 // root
 
-const TABS = ["Design", "IT", "Photography", "Database"];
+const TABS = ["Design", "IT", "Photography"];
 
 export default function Admin() {
   const [unlocked, setUnlocked] = useState(false);
@@ -612,7 +564,6 @@ export default function Admin() {
         {tab === 0 && <DesignPanel toast={toast} />}
         {tab === 1 && <ITPanel toast={toast} />}
         {tab === 2 && <PhotoPanel toast={toast} />}
-        {tab === 3 && <DatabasePanel toast={toast} />}
       </div>
       <Toast msg={toastMsg} />
     </div>
