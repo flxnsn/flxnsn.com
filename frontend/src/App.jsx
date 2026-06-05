@@ -41,7 +41,9 @@ export default function App() {
   useEffect(() => {
   function onKey(e) {
     if (e.key === 'Escape' && contactOpen) setContactOpen(false);
-    if (e.altKey && e.key === 'a') navigate('admin'); // Alt+A
+    if ((e.altKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      navigate('admin');
+    }
   }
   window.addEventListener('keydown', onKey);
   return () => window.removeEventListener('keydown', onKey);
